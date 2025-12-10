@@ -1,0 +1,10 @@
+{
+  "name": "com.miyamoto.solodevelopsetup",
+  "version": "1.0.0",
+  "displayName": "My Solo Develop Setup",
+  "description": "My personal Unity development setup.",
+  "unity": "2021.3",
+  "author": {
+    "name": "Miyamoto Kaito"
+  }
+}
