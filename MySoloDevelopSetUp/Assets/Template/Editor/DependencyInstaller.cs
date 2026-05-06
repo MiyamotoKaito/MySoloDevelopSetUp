@@ -39,7 +39,7 @@ namespace Template.Editor
         [MenuItem("Tools/Install Template Dependencies")]
         private static void InstallFromMenu()
         {
-            InstallDependecies(showLogs: true);
+            InstallDependencies(showLogs: true);
         }
         /// <summary>
         /// エディタ起動時の自動実行
@@ -58,7 +58,7 @@ namespace Template.Editor
         /// semver は "package@version"、Git URL は URL をそのまま Client.Add へ渡す
         /// </summary>
         /// <param name="showLogs">true の場合、各依存の完了ログ/警告を出力する。</param>
-        private static void InstallDependecies(bool showLogs)
+        private static void InstallDependencies(bool showLogs)
         {
             string path = Path.GetFullPath($"Packages/{PACKAGE_NAME}/manifest.json");
             if (!File.Exists(path)) return;
@@ -66,14 +66,14 @@ namespace Template.Editor
             foreach (var dep in ReadDependencies(path))
             {
                 // Git URL の場合は URL 文字列そのまま、通常依存は package@version 形式で追加。
-                AddRequest request = Client.Add(dep.Value.StartsWith("htpps", StringComparison.OrdinalIgnoreCase)
+                AddRequest request = Client.Add(dep.Value.StartsWith("htpp", StringComparison.OrdinalIgnoreCase)
                                                 ? dep.Value
                                                 : $"{dep.Key}{dep.Value}");
 
                 if (showLogs)
                 {
                     // 非同期 AddRequest の完了時に結果をログ出力する。
-                    EditorApplication.update += () => LogWhenFinished(dep.Key, request);
+                    WatchRequest(dep.Key, request);
                 }
             }
         }
@@ -82,20 +82,25 @@ namespace Template.Editor
         /// </summary>
         /// <param name="id">依存パッケージID（ログ表示用）。</param>
         /// <param name="request">Client.Add の非同期リクエスト。</param>
-        private static void LogWhenFinished(string id, AddRequest request)
+        private static void WatchRequest(string id, AddRequest request)
         {
             //AddRequestクラス
             //パッケージのインストール情報を知らせるクラス
+            void Handler()
+            {
+                if (!request.IsCompleted)
+                    return;
 
-            // インストールが終わっていなかったら早期リターン
-            if (!request.IsCompleted)
-                return;
-            // インストール成功
-            if (request.Status == StatusCode.Success)
-                Debug.Log($"[Template] Installed: {id}");
-            // インストール失敗
-            else if (request.Status == StatusCode.Failure)
-                Debug.LogError($"[Template] Installed Failed: {id}");
+                EditorApplication.update -= Handler;
+                // インストール成功
+                if (request.Status == StatusCode.Success)
+                    Debug.Log($"[Template] Installed: {id}");
+
+                // インストール失敗
+                else if (request.Status == StatusCode.Failure)
+                    Debug.LogError($"[Template] Install Failed: {id}\n{request.Error?.message}");
+            }
+            EditorApplication.update += Handler;
         }
         /// <summary>
         /// manifest.json文字列から dependencies　ブロックを抽出し、
