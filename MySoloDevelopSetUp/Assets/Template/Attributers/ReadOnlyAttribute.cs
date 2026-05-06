@@ -1,2 +1,5 @@
-using UnityEngine;
-public class ReadOnlyAttribute : PropertyAttribute { }
+﻿using UnityEngine;
+namespace Template.Editor
+{
+    public class ReadOnlyAttribute : PropertyAttribute { }
+}
