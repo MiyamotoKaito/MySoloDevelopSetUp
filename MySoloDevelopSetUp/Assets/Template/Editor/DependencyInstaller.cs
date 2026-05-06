@@ -66,9 +66,9 @@ namespace Template.Editor
             foreach (var dep in ReadDependencies(path))
             {
                 // Git URL の場合は URL 文字列そのまま、通常依存は package@version 形式で追加。
-                AddRequest request = Client.Add(dep.Value.StartsWith("htpp", StringComparison.OrdinalIgnoreCase)
+                AddRequest request = Client.Add(dep.Value.StartsWith("htpps", StringComparison.OrdinalIgnoreCase)
                                                 ? dep.Value
-                                                : $"{dep.Key}{dep.Value}");
+                                                : $"{dep.Key}@{dep.Value}");
 
                 if (showLogs)
                 {
